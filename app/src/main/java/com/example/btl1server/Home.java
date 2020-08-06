@@ -36,8 +36,10 @@ import com.example.btl1server.ViewHolder.FoodViewHolder;
 import com.example.btl1server.ViewHolder.MenuViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -52,8 +54,11 @@ import com.google.firebase.storage.UploadTask;
 import com.rengwuxian.materialedittext.MaterialEditText;
 import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
+import dmax.dialog.SpotsDialog;
 import info.hoang8f.widget.FButton;
 import io.paperdb.Paper;
 
@@ -231,15 +236,20 @@ public class Home extends AppCompatActivity
                 .setQuery(category, Category.class).build();
 
 
-        adapter = new FirebaseRecyclerAdapter<Category, MenuViewHolder>(options) {
+        adapter = new FirebaseRecyclerAdapter<Category, MenuViewHolder>(options
+             //   Category.class,
+             //   R.layout.menu_item,
+             //   MenuViewHolder.class,
+             //   categories
+        ) {
             @Override
-            protected void onBindViewHolder(@NonNull MenuViewHolder holder, int position, @NonNull Category model) {
-                holder.txtMenuName.setText(model.getName());
+            protected void onBindViewHolder(@NonNull MenuViewHolder viewholder, int position, @NonNull Category model) {
+                viewholder.txtMenuName.setText(model.getName());
                 Picasso.with(getBaseContext()).load(model.getImage())
-                        .into(holder.imageView);
+                        .into(viewholder.imageView);
 
-                //final Category clickItem = model;
-                holder.setItemClickListener(new ItemClickListener() {
+                //final Category clickItem = model; sửa lại
+                viewholder.setItemClickListener(new ItemClickListener() {
                     @Override
                     public void onClick(View view, int position, boolean isLongClick) {
                         //Lấy CategoryId và gửi nó đến Activity mới
@@ -258,6 +268,7 @@ public class Home extends AppCompatActivity
 
                 return new MenuViewHolder(itemView);
             }
+
         };
         adapter.startListening();
 
@@ -336,13 +347,80 @@ public class Home extends AppCompatActivity
             signIn.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(signIn);
         }
+        else if (id == R.id.nav_change_pwd){
+            showChangePasswordDialog();
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-    //update/delete
 
+    private void showChangePasswordDialog() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this);
+        alertDialog.setTitle("Đổi mật khẩu");
+        alertDialog.setMessage("Vui lòng điền đầy đủ thông tin");
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View layout_pwd = inflater.inflate(R.layout.change_password_layout,null);
+
+        final MaterialEditText edtPassOld = (MaterialEditText)layout_pwd.findViewById(R.id.edtPassOld);
+        final MaterialEditText edtNhapPass = (MaterialEditText)layout_pwd.findViewById(R.id.edtNhapPass);
+        final MaterialEditText edtNhaplaiPass = (MaterialEditText)layout_pwd.findViewById(R.id.edtNhaplaiPass);
+
+        alertDialog.setView(layout_pwd);
+
+        //Button
+        alertDialog.setPositiveButton("ĐỔI", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                final android.app.AlertDialog waitingDialog = new SpotsDialog(Home.this);
+                waitingDialog.show();
+
+                if (edtPassOld.getText().toString().equals(Common.currentUser.getPassword())) {
+                    if (edtNhapPass.getText().toString().equals(edtNhaplaiPass.getText().toString())) {
+                        Map<String, Object> passwordUpdate = new HashMap<>();
+                        passwordUpdate.put("Password", edtNhapPass.getText().toString());
+
+                        //Make update
+                        DatabaseReference user = FirebaseDatabase.getInstance().getReference("User");
+                        user.child(Common.currentUser.getPhone())
+                                .updateChildren(passwordUpdate)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        waitingDialog.dismiss();
+                                        Toast.makeText(Home.this, "Đổi mật khẩu thành công", Toast.LENGTH_SHORT).show();
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    } else {
+                        waitingDialog.dismiss();
+                        Toast.makeText(Home.this, "Mật khẩu mới không khớp", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else {
+                    waitingDialog.dismiss();
+                    Toast.makeText(Home.this, "Mật khẩu cũ không đúng", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+        alertDialog.setNegativeButton("ĐÓNG", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        alertDialog.show();
+    }
+
+    //update/delete
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         if(item.getTitle().equals(Common.UPDATE)){

@@ -18,6 +18,11 @@
             android:icon="@drawable/order"
             android:title="Quản lí đơn hàng" />
         <item
+            android:id="@+id/nav_change_pwd"
+            android:icon="@drawable/key"
+            android:title="Đổi mật khẩu"
+            />
+        <item
             android:id="@+id/nav_logout"
             android:icon="@drawable/logout"
             android:title="Đăng Xuất" />

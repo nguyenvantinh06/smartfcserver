@@ -57,6 +57,18 @@
             android:textColor="#fff"
             android:textSize="18sp" />
 
+        <TextView
+            android:id="@+id/forgotPass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:text="Quên mật khẩu?"
+            android:textColor="#ffffff"
+            android:textIsSelectable="true"
+            android:textSize="18sp" />
+
+
     </LinearLayout>
     <info.hoang8f.widget.FButton
         android:id="@+id/btndangnhap1"

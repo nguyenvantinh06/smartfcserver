@@ -5,14 +5,18 @@ public class User {
     private String Password;
     private String Phone;
     private String IsStaff;
+    private String secureCode;
 
     public User() {
     }
 
-    public User(String Name, String Password) {
+    public User(String Name, String Password, String secureCode) {
         this.Name = Name;
         this.Password = Password;
+        this.secureCode = secureCode;
     }
+
+    public String getSecureCode(){ return secureCode;}
 
     public String getIsStaff() {
         return IsStaff;

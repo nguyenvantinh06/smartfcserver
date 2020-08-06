@@ -3,6 +3,7 @@ package com.example.btl1server.ViewHolder;
 import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.View;
+import android.view.View.OnCreateContextMenuListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -12,7 +13,7 @@ import com.example.btl1server.R;
 
 public class MenuViewHolder extends RecyclerView.ViewHolder implements
         View.OnClickListener,
-        View.OnCreateContextMenuListener
+        OnCreateContextMenuListener
 {
     public TextView txtMenuName;
     public ImageView imageView;
@@ -36,10 +37,10 @@ public class MenuViewHolder extends RecyclerView.ViewHolder implements
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        menu.setHeaderTitle("Lựa chọn thao tác");
-        menu.add(0,0,getAdapterPosition(), Common.UPDATE);
-        menu.add(0,1,getAdapterPosition(),Common.DELETE);
+    public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo menuInfo) {
+        contextMenu.setHeaderTitle("Lựa chọn thao tác");
+        contextMenu.add(0,0,getAdapterPosition(), Common.UPDATE);
+        contextMenu.add(0,1,getAdapterPosition(),Common.DELETE);
 
     }
 }
